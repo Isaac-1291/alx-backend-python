@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_CREDENTIALS = 'github-creds'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: "${GITHUB_CREDENTIALS}",
+                    url: 'https://github.com/Isaac-1291/alx-backend-python.git'
+            }
+        }
+
+        stage('Setup Python') {
+            steps {
+                bat 'python -m venv venv'
+                bat '.\\venv\\Scripts\\python.exe -m pip install --upgrade pip'
+                bat '.\\venv\\Scripts\\python.exe -m pip install -r messaging_app\\requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat '.\\venv\\Scripts\\pytest.exe messaging_app\\tests\\ --junitxml=report.xml'
+            }
+        }
+
+        stage('Publish Report') {
+            steps {
+                junit 'report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'report.xml', allowEmptyArchive: true
+        }
+    }
+}
