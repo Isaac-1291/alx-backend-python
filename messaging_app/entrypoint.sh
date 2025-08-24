@@ -1,6 +1,4 @@
 #!/bin/sh
-
-# Exit on any failure
 set -e
 
 # Wait for database to be ready
